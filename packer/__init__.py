@@ -79,6 +79,26 @@ class Packer():
         # validated.failed = not validated.succeeded
         return validated
 
+    def push(self, create=True, token=False):
+        """Implmenets the `packer push` function
+        """
+        pusher = self.packer.push
+        if create:
+            pusher = pusher.bake('-create=true')
+        if token:
+            pusher = pusher.bake('-token={0}'.format(token))
+        pusher = pusher.bake(self.packerfile)
+        return pusher()
+
+    def fix(self, to_file=None):
+        """Implements the `packer fix` function
+        """
+        fixer = self.packer.fix
+        fixer = fixer.bake(self.packerfile)
+        if to_file:
+            fixer = fixer.bake(' > {0}'.format(to_file))
+        return fixer()
+
     def build(self, parallel=True, debug=False, force=False):
         """Executes a Packer build (`packer build`)
 
