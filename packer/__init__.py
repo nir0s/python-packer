@@ -1,14 +1,23 @@
 import sh
 
-__version__ = '0.1.2'
+__version__ = '0.0.1'
 
 DEFAULT_PACKER_PATH = 'packer'
 
 
 class Packer():
-
+    """Packer interface using the `sh` module (http://amoffat.github.io/sh/)
+    """
     def __init__(self, packerfile, exc=None, only=None, vars=None,
                  vars_file=None, exec_path=DEFAULT_PACKER_PATH):
+        """
+        :param string packerfile: Path to Packer template file
+        :param list exc: List of builders to exclude
+        :param list only: List of builders to include
+        :param dict vars: Key Value pairs of template variables
+        :param string vars_file: Path to variables file
+        :param string exec_path: Path to Packer executable
+        """
         self.packerfile = packerfile
         self.exc = exc if exc else []
         self.only = only if only else []
@@ -36,19 +45,19 @@ class Packer():
         return cmd
 
     def _joinc(self, lst):
-        """Returns a comma separated string from a list"""
+        """Returns a comma delimited string from a list"""
         return str(','.join(lst))
 
     def _join(self, lst):
-        """Returns a space separated string from a list"""
+        """Returns a space delimited string from a list"""
         return str(' '.join(lst))
 
     def version(self):
         """Returns Packer's version number (`packer version`)
 
         As of v0.7.5, the format shows when running `packer version`
-        is: Packer vX.Y.Z. This only returns the number, without the
-        `packer v` prefix so that you don't have to parse the version
+        is: Packer vX.Y.Z. This method will only returns the number, without
+        the `packer v` prefix so that you don't have to parse the version
         yourself.
         """
         return self.packer.version().split('v')[1].rstrip('\n')
@@ -57,6 +66,8 @@ class Packer():
         """Validates a Packer Template file (`packer validate`)
 
         If the validation failed, an `sh` exception will be raised.
+        :param bool syntax_only: Whether to validate the syntax only
+        without validating the configuration itself.
         """
         validator = self.packer.validate
         if syntax_only:
@@ -70,6 +81,10 @@ class Packer():
 
     def build(self, parallel=True, debug=False, force=False):
         """Executes a Packer build (`packer build`)
+
+        :param bool parallel: Run builders in parallel
+        :param bool debug: Run in debug mode
+        :param bool force: Force artifact output even if exists
         """
         builder = self.packer.build
         if parallel:
@@ -121,6 +136,7 @@ class Packer():
         """Parses the machine-readable output `packer inspect` provides.
 
         See the inspect method for more info.
+        This has been tested vs. Packer v0.7.5
         """
         parts = {'variables': [], 'builders': [], 'provisioners': []}
         for l in output.splitlines():

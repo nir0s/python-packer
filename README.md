@@ -8,6 +8,8 @@ python-packer
 
 A Python client for [packer.io](http://www.packer.io)
 
+The client has been developed vs. Packer v0.7.5.
+
 ## Installation
 
 You must have Packer installed prior to using this client (DUH!)
@@ -32,11 +34,11 @@ vars_file = 'path/to/vars/file'
 
 p = packer.Packer(packerfile, exc=exc, only=only, vars=vars,
                   vars_file=vars_file, exec_path=packer_exec_path)
-p.version()  # `packer version`
-p.build()  # `packer build`
+print(p.version())  # `packer version`
+p.validate(syntax_only=False)  # `packer validate`
 result = p.inspect()  # `packer inspect`
 print(result.parsed_output)
-p.validate(syntax_only=False)  # `packer validate`
+p.build(parallel=True, debug=False, force=False)  # `packer build`
 ```
 
 The `inspect` method will return a dictionary containing the components:
