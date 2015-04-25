@@ -26,8 +26,9 @@ def _set_global_verbosity_level(is_verbose_output=False):
 
 class Packer():
 
-    def __init__(self, exc=None, only=None, vars=None, vars_file=None,
-                 exec_path=DEFAULT_PACKER_PATH):
+    def __init__(self, packerfile, exc=None, only=None, vars=None,
+                 vars_file=None, exec_path=DEFAULT_PACKER_PATH):
+        self.packerfile = packerfile
         self.exc = exc if exc else []
         self.only = only if only else []
         self.vars = vars if vars else {}
@@ -59,20 +60,30 @@ class Packer():
     def version(self):
         return self.packer.version().split('v')[1].rstrip('\n')
 
-    def validate(self, packerfile, syntax_only=False):
+    def validate(self, syntax_only=False):
         validator = self.packer.validate
         if syntax_only:
             lgr.info('syntax-only check active...')
             validator = validator.bake('-syntax-only')
         validator = self._append_base_arguments(validator)
-        validator = validator.bake(packerfile)
-        lgr.info('Validating packerfile: {0}'.format(packerfile))
-        lgr.info('Executing: {0}'.format(self._join(validator().cmd)))
+        validator = validator.bake(self.packerfile)
+        lgr.info('Validating packerfile: {0}'.format(self.packerfile))
+        # lgr.info('Executing: {0}'.format(self._join(validator().cmd)))
         return validator()
 
-    def build(self, packerfile, parallel=True, debug=False, force=False):
+    def build(self, parallel=True, debug=False, force=False):
         builder = self.packer.build
         if parallel:
             lgr.info('parallel build active...')
-            builder.
+            builder = builder.bake('-parallel=true')
         if debug:
+            lgr.info('debug mode active...')
+            builder = builder.bake('-debug')
+        if force:
+            lgr.info('force mode active...')
+            builder = builder.bake('-force')
+        builder = self._append_base_arguments(builder)
+        builder = builder.bake(self.packerfile)
+        lgr.info('Running build: {0}'.format(self.packerfile))
+        lgr.info('Executing: {0}'.format(self._join(builder().cmd)))
+        return builder()

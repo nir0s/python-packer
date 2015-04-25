@@ -11,7 +11,8 @@ only = []
 vars = {}
 vars_file = '/x'
 
-p = packer.Packer(exc=exc, only=only, vars=vars)
-print(p.version())
+p = packer.Packer(packerfile, exc=exc, only=only, vars=vars)
+# print(p.version())
 
-print(p.validate(packerfile, syntax_only=False))
+print(p.validate(syntax_only=True))
+# print(p.build())
