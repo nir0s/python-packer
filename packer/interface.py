@@ -2,6 +2,7 @@ import logger
 import logging
 import sh
 import sys
+# import re
 
 DEFAULT_PACKER_PATH = 'packer'
 
@@ -87,3 +88,29 @@ class Packer():
         lgr.info('Running build: {0}'.format(self.packerfile))
         lgr.info('Executing: {0}'.format(self._join(builder().cmd)))
         return builder()
+
+    def inspect(self):
+        inspector = self.packer.inspect
+        inspector = inspector.bake('-machine-readable', self.packerfile)
+        lgr.info('Inspecting packerfile: {0}'.format(self.packerfile))
+        result = inspector()
+        result.parsed_output = self._parse_inspection_output(result.stdout)
+        return result
+
+    def _parse_inspection_output(self, output):
+        parts = {'variables': [], 'builders': [], 'provisioners': []}
+        for l in output.splitlines():
+            l = l.split(',')
+            if l[2].startswith('template'):
+                del l[0:2]
+                component = l[0]
+                if component == 'template-variable':
+                    variable = {"name": l[1], "value": l[2]}
+                    parts['variables'].append(variable)
+                elif component == 'template-builder':
+                    builder = {"name": l[1], "type": l[2]}
+                    parts['builders'].append(builder)
+                elif component == 'template-provisioner':
+                    provisioner = {"type": l[1]}
+                    parts['provisioners'].append(provisioner)
+        return parts
