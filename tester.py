@@ -1,4 +1,4 @@
-import packer.interface as packer
+import packer
 import os
 
 packerfile = os.path.expanduser('packer/tests/resources/packerfile.json')  # NOQA
