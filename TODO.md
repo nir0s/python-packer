@@ -1,0 +1,5 @@
+- repex/logger.py:60:    #  TODO: (IMPRV) only perform file related actions if file handler is
+- repex/logger.py:61:    #  TODO: (IMPRV) defined.
+- repex/repex.py:27:    #  TODO: (IMPRV) only raise exceptions in verbose mode
+- repex/repex.py:161:    #  TODO: Handle cases where var is referenced
+- repex/repex.py:162:    #  TODO: but not defined
