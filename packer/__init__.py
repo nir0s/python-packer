@@ -1,6 +1,5 @@
 import sh
 
-__author__ = 'Gigaspaces'
 __version__ = '0.1.2'
 
 DEFAULT_PACKER_PATH = 'packer'
@@ -56,18 +55,17 @@ class Packer():
 
     def validate(self, syntax_only=False):
         """Validates a Packer Template file (`packer validate`)
+
+        If the validation failed, an `sh` exception will be raised.
         """
         validator = self.packer.validate
         if syntax_only:
             validator = validator.bake('-syntax-only')
         validator = self._append_base_arguments(validator)
         validator = validator.bake(self.packerfile)
-        try:
-            validated = validator()
-        except:
-            print 'HASDHASD'
-        validated.succeeded = True if validated.exit_code == 0 else False
-        validated.failed = not validated.succeeded
+        validated = validator()
+        # validated.succeeded = True if validated.exit_code == 0 else False
+        # validated.failed = not validated.succeeded
         return validated
 
     def build(self, parallel=True, debug=False, force=False):

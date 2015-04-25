@@ -20,8 +20,6 @@ You must have Packer installed prior to using this client (DUH!)
 
 ## Usage Example
 
-### Executing a build
-
 ```python
 import packer
 
@@ -34,8 +32,35 @@ vars_file = 'path/to/vars/file'
 
 p = packer.Packer(packerfile, exc=exc, only=only, vars=vars,
                   vars_file=vars_file, exec_path=packer_exec_path)
-# print(p.validate(syntax_only=True))
-print(p.build())
-result = p.inspect()
-print result.parsed_output
+p.version()  # `packer version`
+p.build()  # `packer build`
+result = p.inspect()  # `packer inspect`
+print(result.parsed_output)
+p.validate(syntax_only=False)  # `packer validate`
+```
+
+The `inspect` method will return a dictionary containing the components:
+
+```python
+"variables": [
+  {
+    "name": "aws_access_key",
+    "value": "{{env `AWS_ACCESS_KEY_ID`}}"
+  },
+  {
+    "name": "aws_secret_key",
+    "value": "{{env `AWS_ACCESS_KEY`}}"
+  }
+],
+"provisioners": [
+  {
+    "type": "shell"
+  }
+],
+"builders": [
+  {
+    "type": "amazon-ebs",
+    "name": "amazon"
+  }
+]
 ```
