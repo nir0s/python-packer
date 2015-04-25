@@ -1,8 +1,6 @@
 import packer
-import os
 
-packerfile = os.path.expanduser('packer/tests/resources/packerfile.json')  # NOQA
-
+packerfile = 'packer/tests/resources/packerfile.json'
 # exc = ['z', 't']
 exc = []
 # only = ['x', 'y']
@@ -14,7 +12,7 @@ vars_file = '/x'
 p = packer.Packer(packerfile, exc=exc, only=only, vars=vars)
 # print(p.version())
 
-# print(p.validate(syntax_only=True))
+print(p.validate(syntax_only=False))
 # print(p.build())
-result = p.inspect()
-print result.parsed_output
+# result = p.inspect()
+# print result.parsed_output

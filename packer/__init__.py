@@ -62,7 +62,13 @@ class Packer():
             validator = validator.bake('-syntax-only')
         validator = self._append_base_arguments(validator)
         validator = validator.bake(self.packerfile)
-        return validator()
+        try:
+            validated = validator()
+        except:
+            print 'HASDHASD'
+        validated.succeeded = True if validated.exit_code == 0 else False
+        validated.failed = not validated.succeeded
+        return validated
 
     def build(self, parallel=True, debug=False, force=False):
         """Executes a Packer build (`packer build`)
@@ -108,9 +114,10 @@ class Packer():
         """
         inspector = self.packer.inspect
         inspector = inspector.bake('-machine-readable', self.packerfile)
-        result = inspector()
-        result.parsed_output = self._parse_inspection_output(result.stdout)
-        return result
+        inspected = inspector()
+        inspected.parsed_output = self._parse_inspection_output(
+            inspected.stdout)
+        return inspected
 
     def _parse_inspection_output(self, output):
         """Parses the machine-readable output `packer inspect` provides.
