@@ -45,6 +45,7 @@ p.build(parallel=True, debug=False, force=False)
 ```python
 ...
 
+p = packer.Packer(packerfile, ...)
 output_file = 'packer/tests/resources/packerfile_fixed.json'
 print(p.fix(output_file))
 ```
@@ -59,6 +60,7 @@ If the `mrf` argument is set to `True`, the output will be parsed and returned a
 ```python
 ...
 
+p = packer.Packer(packerfile, ...)
 result = p.inspect(mrf=True)
 print(result.parsed_output)
 
@@ -91,6 +93,7 @@ If the `mrf` argument is set to `False`, the output will not be parsed but rathe
 ```python
 ...
 
+p = packer.Packer(packerfile, ...)
 result = p.inspect(mrf=True)
 print(result.stdout)
 
@@ -120,6 +123,7 @@ You must be logged into Atlas to use the `push` function:
 ```python
 ...
 
+p = packer.Packer(packerfile, ...)
 atlas_token = 'oi21mok3mwqtk31om51o2joj213m1oo1i23n1o2'
 p.push(create=True, token=atlas_token)
 ```
@@ -129,6 +133,7 @@ p.push(create=True, token=atlas_token)
 ```python
 ...
 
+p = packer.Packer(packerfile, ...)
 p.validate(syntax_only=False)
 ```
 
@@ -137,6 +142,7 @@ p.validate(syntax_only=False)
 ```python
 ...
 
+p = packer.Packer(packerfile, ...)
 print(p.version())
 ```
 
