@@ -1,7 +1,7 @@
 {
   "variables": {
-    "variable1": "{{user `variable1`}}",
-    "variable2": "{{user `variable2`}}",
+    "variable2": "",
+    "variable1": "",
     "aws_access_key": "{{env `AWS_ACCESS_KEY_ID`}}",
     "aws_secret_key": "{{env `AWS_ACCESS_KEY`}}",
     "aws_source_ami": "",
