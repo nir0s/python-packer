@@ -43,7 +43,7 @@ result = p.inspect()  # `packer inspect`
 print(result.parsed_output)
 p.build(parallel=True, debug=False, force=False)  # `packer build`
 # if you're logged into Atlas, you can also:
-p.push(create=True, token=atlas_token)
+p.push(create=True, token=atlas_token)  # `packer push`
 ```
 
 The `inspect` method will return a dictionary containing the components:
