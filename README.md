@@ -71,3 +71,11 @@ The `inspect` method will return a dictionary containing the components:
   }
 ]
 ```
+
+## Shell Interaction
+
+The [sh](http://amoffat.github.io/sh/) Python module is used to execute Packer.
+As such, return values from all functional methods (`validate`, `build`, etc..) other than the `version` method
+will return an `sh` execution object. This is meant for you to be able to read stdout, stderr, exit codes and more after executing the commands. With the progression of `python-packer` less abstract objects will return and more concise return values will be provided.
+
+Additionally, to verify that all errors return with as much info as possible, error handling is done gently. Most errors will raise an `sh` exception so that you're able to interact with them. Again, as this module progresses, these exceptions will be handled properly.
