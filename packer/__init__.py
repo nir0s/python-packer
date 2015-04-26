@@ -32,95 +32,6 @@ class Packer():
                 self.packerfile))
         self.packer = sh.Command(exec_path)
 
-    def _validate_argtype(self, arg, argtype):
-        if not isinstance(arg, argtype):
-            raise PackerException('{0} argument must be of type {1}'.format(
-                arg, argtype))
-        return arg
-
-    def _append_base_arguments(self, command):
-        """Appends base arguments to packer commands.
-
-        -except, -only, -var and -vars-file are appeneded to almost
-        all subcommands in packer. As such this can be called to add
-        these flags to the subcommand.
-        """
-        if self.exc and self.only:
-            raise PackerException('Cannot provide both "except" and "only"')
-        elif self.exc:
-            command = command.bake('-except={0}'.format(self._joinc(self.exc)))
-        elif self.only:
-            command = command.bake('-only={0}'.format(self._joinc(self.only)))
-        for var, value in self.vars.items():
-            command = command.bake("-var '{0}={1}'".format(var, value))
-        if self.vars_file:
-            command = command.bake('-vars-file={0}'.format(self.vars_file))
-        return command
-
-    def _joinc(self, lst):
-        """Returns a comma delimited string from a list"""
-        return str(','.join(lst))
-
-    def _joins(self, lst):
-        """Returns a space delimited string from a list"""
-        return str(' '.join(lst))
-
-    def version(self):
-        """Returns Packer's version number (`packer version`)
-
-        As of v0.7.5, the format shows when running `packer version`
-        is: Packer vX.Y.Z. This method will only returns the number, without
-        the `packer v` prefix so that you don't have to parse the version
-        yourself.
-        """
-        return self.packer.version().split('v')[1].rstrip('\n')
-
-    def validate(self, syntax_only=False):
-        """Validates a Packer Template file (`packer validate`)
-
-        If the validation failed, an `sh` exception will be raised.
-        :param bool syntax_only: Whether to validate the syntax only
-        without validating the configuration itself.
-        """
-        command = self.packer.validate
-        if syntax_only:
-            command = command.bake('-syntax-only')
-        command = self._append_base_arguments(command)
-        command = command.bake(self.packerfile)
-        return command()
-        # err.. need to return normal values with validation result
-        # validated.succeeded = True if validated.exit_code == 0 else False
-        # validated.failed = not validated.succeeded
-
-    def push(self, create=True, token=False):
-        """Implmenets the `packer push` function
-
-        UNTESTED!
-        """
-        command = self.packer.push
-        if create:
-            command = command.bake('-create=true')
-        if token:
-            command = command.bake('-token={0}'.format(token))
-        command = command.bake(self.packerfile)
-        return command()
-
-    def fix(self, to_file=None):
-        """Implements the `packer fix` function
-        """
-        cmd = self.packer.fix
-        cmd = cmd.bake(self.packerfile)
-        result = cmd()
-        if to_file:
-            with open(to_file, 'w') as f:
-                f.write(result.stdout)
-        return result
-
-    def _add_opt(self, command, option):
-        if option:
-            return command.bake(option)
-        return command
-
     def build(self, parallel=True, debug=False, force=False):
         """Executes a Packer build (`packer build`)
 
@@ -132,15 +43,20 @@ class Packer():
         cmd = self._add_opt(cmd, '-parallel=true' if parallel else None)
         cmd = self._add_opt(cmd, '-debug' if debug else None)
         cmd = self._add_opt(cmd, '-force' if force else None)
-        # if parallel:
-        #     cmd = cmd.bake('-parallel=true')
-        # if debug:
-        #     cmd = cmd.bake('-debug')
-        # if force:
-        #     cmd = cmd.bake('-force')
         cmd = self._append_base_arguments(cmd)
         cmd = cmd.bake(self.packerfile)
         return cmd()
+
+    def fix(self, to_file=None):
+        """Implements the `packer fix` function
+        """
+        cmd = self.packer.fix
+        cmd = cmd.bake(self.packerfile)
+        result = cmd()
+        if to_file:
+            with open(to_file, 'w') as f:
+                f.write(result.stdout)
+        return result
 
     def inspect(self):
         """Inspects a Packer Templates file (`packer inspect -machine-readable`)
@@ -176,6 +92,84 @@ class Packer():
         result.parsed_output = self._parse_inspection_output(
             result.stdout)
         return result
+
+    def push(self, create=True, token=False):
+        """Implmenets the `packer push` function
+
+        UNTESTED!
+        """
+        command = self.packer.push
+        if create:
+            command = command.bake('-create=true')
+        if token:
+            command = command.bake('-token={0}'.format(token))
+        command = command.bake(self.packerfile)
+        return command()
+
+    def validate(self, syntax_only=False):
+        """Validates a Packer Template file (`packer validate`)
+
+        If the validation failed, an `sh` exception will be raised.
+        :param bool syntax_only: Whether to validate the syntax only
+        without validating the configuration itself.
+        """
+        command = self.packer.validate
+        if syntax_only:
+            command = command.bake('-syntax-only')
+        command = self._append_base_arguments(command)
+        command = command.bake(self.packerfile)
+        return command()
+        # err.. need to return normal values with validation result
+        # validated.succeeded = True if validated.exit_code == 0 else False
+        # validated.failed = not validated.succeeded
+
+    def version(self):
+        """Returns Packer's version number (`packer version`)
+
+        As of v0.7.5, the format shows when running `packer version`
+        is: Packer vX.Y.Z. This method will only returns the number, without
+        the `packer v` prefix so that you don't have to parse the version
+        yourself.
+        """
+        return self.packer.version().split('v')[1].rstrip('\n')
+
+    def _add_opt(self, command, option):
+        if option:
+            return command.bake(option)
+        return command
+
+    def _validate_argtype(self, arg, argtype):
+        if not isinstance(arg, argtype):
+            raise PackerException('{0} argument must be of type {1}'.format(
+                arg, argtype))
+        return arg
+
+    def _append_base_arguments(self, command):
+        """Appends base arguments to packer commands.
+
+        -except, -only, -var and -vars-file are appeneded to almost
+        all subcommands in packer. As such this can be called to add
+        these flags to the subcommand.
+        """
+        if self.exc and self.only:
+            raise PackerException('Cannot provide both "except" and "only"')
+        elif self.exc:
+            command = command.bake('-except={0}'.format(self._joinc(self.exc)))
+        elif self.only:
+            command = command.bake('-only={0}'.format(self._joinc(self.only)))
+        for var, value in self.vars.items():
+            command = command.bake("-var '{0}={1}'".format(var, value))
+        if self.vars_file:
+            command = command.bake('-vars-file={0}'.format(self.vars_file))
+        return command
+
+    def _joinc(self, lst):
+        """Returns a comma delimited string from a list"""
+        return str(','.join(lst))
+
+    def _joins(self, lst):
+        """Returns a space delimited string from a list"""
+        return str(' '.join(lst))
 
     def _parse_inspection_output(self, output):
         """Parses the machine-readable output `packer inspect` provides.
