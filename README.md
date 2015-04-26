@@ -8,7 +8,10 @@ python-packer
 
 A Python client for [packer.io](http://www.packer.io)
 
+## Packer version
+
 The client has been developed vs. Packer v0.7.5.
+
 
 ## Installation
 
@@ -55,7 +58,9 @@ The `output_file` parameter will write the output of the `fix` function to a fil
 
 ###  [Packer.inspect()](https://www.packer.io/docs/command-line/inspect.html)
 
-If the `mrf` argument is set to `True`, the output will be parsed and returned as a dictionary containing the components:
+A `-machine-readable` (mrf) argument is provided.
+
+If the `mrf` argument is set to `True`, the output will be parsed and an object containing the parsed output will be exposed as a dictionary containing the components:
 
 ```python
 ...
@@ -63,6 +68,7 @@ If the `mrf` argument is set to `True`, the output will be parsed and returned a
 p = packer.Packer(packerfile, ...)
 result = p.inspect(mrf=True)
 print(result.parsed_output)
+# print(result.stdout) can also be used here
 
 # output:
 "variables": [
