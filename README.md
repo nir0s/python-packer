@@ -20,35 +20,49 @@ You must have Packer installed prior to using this client (DUH!)
  pip install https://github.com/nir0s/python-packer/archive/master.tar.gz
 ```
 
-## Usage Example
+## Usage Examples
+
+### [Packer.build()](https://www.packer.io/docs/command-line/build.html)
 
 ```python
 import packer
 
 packerfile = 'packer/tests/resources/packerfile.json'
-output_file = 'packer/tests/resources/packerfile_fixed.json'
-atlas_token = 'oi21mok3mwqtk31om51o2joj213m1oo1i23n1o2'
-packer_exec_path = '/usr/bin/packer'
 exc = []
 only = ['my_first_image', 'my_second_image']
 vars = {"variable1": "value1", "variable2": "value2"}
 vars_file = 'path/to/vars/file'
+packer_exec_path = '/usr/bin/packer'
 
 p = packer.Packer(packerfile, exc=exc, only=only, vars=vars,
                   vars_file=vars_file, exec_path=packer_exec_path)
-print(p.version())  # `packer version`
-p.validate(syntax_only=False)  # `packer validates`
-print(p.fix(output_file))  # `packer fix`
-result = p.inspect()  # `packer inspect`
-print(result.parsed_output)
-p.build(parallel=True, debug=False, force=False)  # `packer build`
-# if you're logged into Atlas, you can also:
-p.push(create=True, token=atlas_token)  # `packer push`
+p.build(parallel=True, debug=False, force=False)
 ```
 
-The `inspect` method will return a dictionary containing the components:
+
+### [Packer.fix()](https://www.packer.io/docs/command-line/fix.html)
 
 ```python
+...
+
+output_file = 'packer/tests/resources/packerfile_fixed.json'
+print(p.fix(output_file))
+```
+
+The `output_file` parameter will write the output of the `fix` function to a file.
+
+
+###  [Packer.inspect()](https://www.packer.io/docs/command-line/inspect.html)
+
+If the `mrf` argument is set to `True`, the output will be parsed and returned as a dictionary containing the components:
+
+```python
+...
+
+result = p.inspect(mrf=True)
+print(result.parsed_output)
+
+# output:
 "variables": [
   {
     "name": "aws_access_key",
@@ -70,6 +84,60 @@ The `inspect` method will return a dictionary containing the components:
     "name": "amazon"
   }
 ]
+```
+
+If the `mrf` argument is set to `False`, the output will not be parsed but rather returned as is:
+
+```python
+...
+
+result = p.inspect(mrf=True)
+print(result.stdout)
+
+# output:
+Optional variables and their defaults:
+
+  aws_access_key          = {{env `AWS_ACCESS_KEY_ID`}}
+  aws_secret_key          = {{env `AWS_ACCESS_KEY`}}
+
+Builders:
+
+  amazon                   (amazon-ebs)
+
+Provisioners:
+
+  shell
+
+...
+
+```
+
+
+### [Packer.push()](https://www.packer.io/docs/command-line/push.html)
+
+You must be logged into Atlas to use the `push` function:
+
+```python
+...
+
+atlas_token = 'oi21mok3mwqtk31om51o2joj213m1oo1i23n1o2'
+p.push(create=True, token=atlas_token)
+```
+
+### [Packer.validate()](https://www.packer.io/docs/command-line/validate.html)
+
+```python
+...
+
+p.validate(syntax_only=False)
+```
+
+### Packer.version()
+
+```python
+...
+
+print(p.version())
 ```
 
 ## Shell Interaction

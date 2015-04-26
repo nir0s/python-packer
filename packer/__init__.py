@@ -58,7 +58,7 @@ class Packer():
                 f.write(result.stdout)
         return result
 
-    def inspect(self):
+    def inspect(self, mrf=True):
         """Inspects a Packer Templates file (`packer inspect -machine-readable`)
 
         To return the output in a readable form, the `-machine-readable` flag
@@ -85,12 +85,15 @@ class Packer():
               "name": "amazon"
             }
           ]
+        :param bool machine_readable: output in machine-readable form.
         """
-        command = self.packer.inspect
-        command = command.bake('-machine-readable', self.packerfile)
-        result = command()
-        result.parsed_output = self._parse_inspection_output(
-            result.stdout)
+        cmd = self.packer.inspect
+        cmd = self._add_opt(cmd, '-machine-readable' if mrf else None)
+        cmd = cmd.bake(self.packerfile)
+        result = cmd()
+        if mrf:
+            result.parsed_output = self._parse_inspection_output(
+                result.stdout)
         return result
 
     def push(self, create=True, token=False):
