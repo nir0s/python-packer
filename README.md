@@ -26,19 +26,24 @@ You must have Packer installed prior to using this client (DUH!)
 import packer
 
 packerfile = 'packer/tests/resources/packerfile.json'
+output_file = 'packer/tests/resources/packerfile_fixed.json'
+atlas_token = 'oi21mok3mwqtk31om51o2joj213m1oo1i23n1o2'
 packer_exec_path = '/usr/bin/packer'
 exc = []
-only = []
-vars = {"variable1": "y", "variable2": "value"}
+only = ['my_first_image', 'my_second_image']
+vars = {"variable1": "value1", "variable2": "value2"}
 vars_file = 'path/to/vars/file'
 
 p = packer.Packer(packerfile, exc=exc, only=only, vars=vars,
                   vars_file=vars_file, exec_path=packer_exec_path)
 print(p.version())  # `packer version`
-p.validate(syntax_only=False)  # `packer validate`
+p.validate(syntax_only=False)  # `packer validates`
+print(p.fix(output_file))  # `packer fix`
 result = p.inspect()  # `packer inspect`
 print(result.parsed_output)
 p.build(parallel=True, debug=False, force=False)  # `packer build`
+# if you're logged into Atlas, you can also:
+p.push(create=True, token=atlas_token)
 ```
 
 The `inspect` method will return a dictionary containing the components:

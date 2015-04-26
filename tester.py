@@ -11,7 +11,7 @@ vars_file = '/x'
 
 p = packer.Packer(packerfile, exc=exc, only=only, vars=vars)
 print(p.version())
-print(p.validate(syntax_only=True))
+print(p.validate(syntax_only=False))
 result = p.inspect()
 print result.parsed_output
 print(p.fix('TEST.json'))
