@@ -6,11 +6,11 @@ python-packer
 * Version [![PypI](http://img.shields.io/pypi/v/python-packer.svg)](http://img.shields.io/pypi/v/python-packer.svg)
 
 
-A Python client for [packer.io](http://www.packer.io)
+A Python interface for [packer.io](http://www.packer.io)
 
 ## Packer version
 
-The client has been developed vs. Packer v0.7.5.
+The interface has been developed vs. Packer v0.7.5.
 
 
 ## Installation
