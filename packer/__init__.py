@@ -1,8 +1,9 @@
 import sh
 import os
 import json
+import zipfile
 
-__version__ = '0.0.1'
+__version__ = '0.0.2'
 
 DEFAULT_PACKER_PATH = 'packer'
 
@@ -203,9 +204,26 @@ class Packer():
         return parts
 
 
-# class Install():
-#     def __init__(self):
-#         self.installer_path = os.environ['PACKER_INSTALLER_PATH']
+class Install():
+    def __init__(self, packer_path, installer_path):
+        self.packer_path = packer_path
+        self.installer_path = installer_path
+
+    def install(self):
+        with open(self.installer_path, 'rb') as f:
+            zip = zipfile.ZipFile(f)
+            for path in zip.namelist():
+                zip.extract(path, self.packer_path)
+        exec_path = os.path.join(self.packer_path, 'packer')
+        if not self._verify(exec_path):
+            raise PackerException('packer installation failed. '
+                                  'Executable could not be found under: '
+                                  '{0}'.format(exec_path))
+        else:
+            return exec_path
+
+    def _verify(self, packer):
+        return True if os.path.isfile(packer) else False
 
 
 class ValidationObject():
@@ -214,3 +232,6 @@ class ValidationObject():
 
 class PackerException(Exception):
     pass
+
+
+# 0587508070
