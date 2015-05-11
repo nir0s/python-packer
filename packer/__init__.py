@@ -1,5 +1,6 @@
 import sh
 import os
+import json
 
 __version__ = '0.0.1'
 
@@ -27,9 +28,6 @@ class Packer():
         self.exc = self._validate_argtype(exc if exc else [], list)
         self.only = self._validate_argtype(only if only else [], list)
         self.vars = self._validate_argtype(vars if vars else {}, dict)
-        if not os.path.isfile(self.packerfile):
-            raise OSError('packerfile not found at path: {0}'.format(
-                self.packerfile))
         self.packer = sh.Command(exec_path)
 
     def build(self, parallel=True, debug=False, force=False):
@@ -39,23 +37,26 @@ class Packer():
         :param bool debug: Run in debug mode
         :param bool force: Force artifact output even if exists
         """
-        cmd = self.packer.build
-        cmd = self._add_opt(cmd, '-parallel=true' if parallel else None)
-        cmd = self._add_opt(cmd, '-debug' if debug else None)
-        cmd = self._add_opt(cmd, '-force' if force else None)
-        cmd = self._append_base_arguments(cmd)
-        cmd = cmd.bake(self.packerfile)
-        return cmd()
+        self.ccmd = self.packer.build
+        self._add_opt('-parallel=true' if parallel else None)
+        self._add_opt('-debug' if debug else None)
+        self._add_opt('-force' if force else None)
+        self._append_base_arguments()
+        self._add_opt(self.packerfile)
+        return self.ccmd()
 
     def fix(self, to_file=None):
         """Implements the `packer fix` function
+
+        :param string to_file: File to output fixed template to
         """
-        cmd = self.packer.fix
-        cmd = cmd.bake(self.packerfile)
-        result = cmd()
+        self.ccmd = self.packer.fix
+        self._add_opt(self.packerfile)
+        result = self.ccmd()
         if to_file:
             with open(to_file, 'w') as f:
                 f.write(result.stdout)
+        result.fixed = json.loads(result.stdout)
         return result
 
     def inspect(self, mrf=True):
@@ -85,12 +86,12 @@ class Packer():
               "name": "amazon"
             }
           ]
-        :param bool machine_readable: output in machine-readable form.
+        :param bool mrf: output in machine-readable form.
         """
-        cmd = self.packer.inspect
-        cmd = self._add_opt(cmd, '-machine-readable' if mrf else None)
-        cmd = cmd.bake(self.packerfile)
-        result = cmd()
+        self.ccmd = self.packer.inspect
+        self._add_opt('-machine-readable' if mrf else None)
+        self._add_opt(self.packerfile)
+        result = self.ccmd()
         if mrf:
             result.parsed_output = self._parse_inspection_output(
                 result.stdout)
@@ -99,15 +100,13 @@ class Packer():
     def push(self, create=True, token=False):
         """Implmenets the `packer push` function
 
-        UNTESTED!
+        UNTESTED! Must be used alongside an Atlas account
         """
-        command = self.packer.push
-        if create:
-            command = command.bake('-create=true')
-        if token:
-            command = command.bake('-token={0}'.format(token))
-        command = command.bake(self.packerfile)
-        return command()
+        self.ccmd = self.packer.push
+        self._add_opt('-create=true' if create else None)
+        self._add_opt('-tokn={0}'.format(token) if token else None)
+        self._add_opt(self.packerfile)
+        return self.ccmd()
 
     def validate(self, syntax_only=False):
         """Validates a Packer Template file (`packer validate`)
@@ -116,15 +115,23 @@ class Packer():
         :param bool syntax_only: Whether to validate the syntax only
         without validating the configuration itself.
         """
-        command = self.packer.validate
-        if syntax_only:
-            command = command.bake('-syntax-only')
-        command = self._append_base_arguments(command)
-        command = command.bake(self.packerfile)
-        return command()
-        # err.. need to return normal values with validation result
-        # validated.succeeded = True if validated.exit_code == 0 else False
-        # validated.failed = not validated.succeeded
+        self.ccmd = self.packer.validate
+        self._add_opt('-syntax-only' if syntax_only else None)
+        self._append_base_arguments()
+        self._add_opt(self.packerfile)
+        # as sh raises an exception rather than return a value when execution
+        # fails we create an object to return the exception and the validation
+        # state
+        try:
+            validation = self.ccmd()
+            validation.succeeded = True if validation.exit_code == 0 else False
+            validation.error = None
+        except Exception as ex:
+            validation = ValidationObject()
+            validation.succeeded = False
+            validation.failed = True
+            validation.error = ex.message
+        return validation
 
     def version(self):
         """Returns Packer's version number (`packer version`)
@@ -136,10 +143,9 @@ class Packer():
         """
         return self.packer.version().split('v')[1].rstrip('\n')
 
-    def _add_opt(self, command, option):
+    def _add_opt(self, option):
         if option:
-            return command.bake(option)
-        return command
+            self.ccmd = self.ccmd.bake(option)
 
     def _validate_argtype(self, arg, argtype):
         if not isinstance(arg, argtype):
@@ -147,7 +153,7 @@ class Packer():
                 arg, argtype))
         return arg
 
-    def _append_base_arguments(self, command):
+    def _append_base_arguments(self):
         """Appends base arguments to packer commands.
 
         -except, -only, -var and -vars-file are appeneded to almost
@@ -157,14 +163,13 @@ class Packer():
         if self.exc and self.only:
             raise PackerException('Cannot provide both "except" and "only"')
         elif self.exc:
-            command = command.bake('-except={0}'.format(self._joinc(self.exc)))
+            self._add_opt('-except={0}'.format(self._joinc(self.exc)))
         elif self.only:
-            command = command.bake('-only={0}'.format(self._joinc(self.only)))
+            self._add_opt('-only={0}'.format(self._joinc(self.only)))
         for var, value in self.vars.items():
-            command = command.bake("-var '{0}={1}'".format(var, value))
+            self._add_opt("-var '{0}={1}'".format(var, value))
         if self.vars_file:
-            command = command.bake('-vars-file={0}'.format(self.vars_file))
-        return command
+            self._add_opt('-vars-file={0}'.format(self.vars_file))
 
     def _joinc(self, lst):
         """Returns a comma delimited string from a list"""
@@ -196,6 +201,15 @@ class Packer():
                     provisioner = {"type": l[1]}
                     parts['provisioners'].append(provisioner)
         return parts
+
+
+# class Install():
+#     def __init__(self):
+#         self.installer_path = os.environ['PACKER_INSTALLER_PATH']
+
+
+class ValidationObject():
+    pass
 
 
 class PackerException(Exception):

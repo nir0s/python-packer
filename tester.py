@@ -11,8 +11,10 @@ vars_file = '/x'
 
 p = packer.Packer(packerfile, exc=exc, only=only, vars=vars)
 # print(p.version())
-# print(p.validate(syntax_only=False))
-result = p.inspect(mrf=False)
-print result.stdout
-# print(p.fix('TEST.json'))
+# validation = p.validate(syntax_only=True)
+# print(validation.succeeded)
+# print(validation.error)
+# result = p.inspect(mrf=True)
+# print result.parsed_output
+# print(p.fix('TEST.json').fixed)
 # print(p.build())
