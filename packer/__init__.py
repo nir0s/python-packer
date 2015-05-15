@@ -204,7 +204,7 @@ class Packer():
         return parts
 
 
-class Install():
+class Installer():
     def __init__(self, packer_path, installer_path):
         self.packer_path = packer_path
         self.installer_path = installer_path
@@ -232,6 +232,3 @@ class ValidationObject():
 
 class PackerException(Exception):
     pass
-
-
-# 0587508070

@@ -56,7 +56,7 @@ print(p.fix(output_file))
 The `output_file` parameter will write the output of the `fix` function to a file.
 
 
-###  [Packer.inspect()](https://www.packer.io/docs/command-line/inspect.html)
+### [Packer.inspect()](https://www.packer.io/docs/command-line/inspect.html)
 
 A `-machine-readable` (mrf) argument is provided.
 
@@ -150,6 +150,19 @@ p.validate(syntax_only=False)
 
 p = packer.Packer(packerfile, ...)
 print(p.version())
+```
+
+### PackerInstaller.install()
+
+This installs packer to `packer_path` using the `installer_path` and verifies that the installation was successful.
+
+```python
+
+packer_path = '/usr/bin/'
+installer_path = 'Downloads/packer_0.7.5_linux_amd64.zip'
+
+p = packer.Installer(packer_path, installer_path)
+p.install()
 ```
 
 ## Shell Interaction
