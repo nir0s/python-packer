@@ -3,7 +3,7 @@ import os
 import json
 import zipfile
 
-__version__ = '0.0.2'
+__version__ = '0.0.3'
 
 DEFAULT_PACKER_PATH = 'packer'
 
@@ -98,14 +98,15 @@ class Packer():
                 result.stdout)
         return result
 
-    def push(self, create=True, token=False):
+    def push(self, name, message=None, token=False):
         """Implmenets the `packer push` function
 
         UNTESTED! Must be used alongside an Atlas account
         """
         self.ccmd = self.packer.push
-        self._add_opt('-create=true' if create else None)
-        self._add_opt('-tokn={0}'.format(token) if token else None)
+        self._add_opt('-name={0}'.format(name))
+        self._add_opt('-token={0}'.format(token) if token else None)
+        self._add_opt("-message='{0}'".format(message) if message else None)
         self._add_opt(self.packerfile)
         return self.ccmd()
 
@@ -184,7 +185,7 @@ class Packer():
         """Parses the machine-readable output `packer inspect` provides.
 
         See the inspect method for more info.
-        This has been tested vs. Packer v0.7.5
+        This has been tested vs. Packer v0.8.5
         """
         parts = {'variables': [], 'builders': [], 'provisioners': []}
         for l in output.splitlines():

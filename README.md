@@ -10,7 +10,7 @@ A Python interface for [packer.io](http://www.packer.io)
 
 ## Packer version
 
-The interface has been developed vs. Packer v0.7.5.
+The interface has been developed vs. Packer v0.8.5
 
 
 ## Installation
@@ -131,7 +131,8 @@ You must be logged into Atlas to use the `push` function:
 
 p = packer.Packer(packerfile, ...)
 atlas_token = 'oi21mok3mwqtk31om51o2joj213m1oo1i23n1o2'
-p.push(create=True, token=atlas_token)
+name = 'testorg/testbox'
+p.push(name, create=True, token=atlas_token)
 ```
 
 ### [Packer.validate()](https://www.packer.io/docs/command-line/validate.html)
@@ -159,7 +160,7 @@ This installs packer to `packer_path` using the `installer_path` and verifies th
 ```python
 
 packer_path = '/usr/bin/'
-installer_path = 'Downloads/packer_0.7.5_linux_amd64.zip'
+installer_path = 'Downloads/packer_0.8.5_linux_amd64.zip'
 
 p = packer.Installer(packer_path, installer_path)
 p.install()
