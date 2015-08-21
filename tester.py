@@ -9,7 +9,7 @@ only = []
 vars = {}
 vars_file = '/x'
 
-p = packer.Installer('packer_executables/', 'packer_0.7.5_linux_amd64.zip')
+p = packer.Installer('packer_executables/', 'packer_0.8.5_linux_amd64.zip')
 # If we installed packer using the provided installer, it will return
 # packer's executable path. We can use it below:
 # packer_exec = p.install()
