@@ -107,6 +107,7 @@ class Packer():
         self._add_opt('-name={0}'.format(name))
         self._add_opt('-token={0}'.format(token) if token else None)
         self._add_opt("-message='{0}'".format(message) if message else None)
+        self._append_base_arguments()
         self._add_opt(self.packerfile)
         return self.ccmd()
 
@@ -169,9 +170,9 @@ class Packer():
         elif self.only:
             self._add_opt('-only={0}'.format(self._joinc(self.only)))
         for var, value in self.vars.items():
-            self._add_opt("-var '{0}={1}'".format(var, value))
+            self._add_opt('-var \'{0}={1}\''.format(var, value))
         if self.vars_file:
-            self._add_opt('-vars-file={0}'.format(self.vars_file))
+            self._add_opt('-var-file={0}'.format(self.vars_file))
 
     def _joinc(self, lst):
         """Returns a comma delimited string from a list"""
