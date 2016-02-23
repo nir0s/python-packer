@@ -168,7 +168,8 @@ class Packer():
         elif self.only:
             self._add_opt('-only={0}'.format(self._joinc(self.only)))
         for var, value in self.vars.items():
-            self._add_opt("-var '{0}={1}'".format(var, value))
+            self._add_opt('-var')
+            self._add_opt('{0}={1}'.format(var, value))
         if self.vars_file:
             self._add_opt('-vars-file={0}'.format(self.vars_file))
 
