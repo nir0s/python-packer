@@ -34,11 +34,11 @@ packerfile = 'packer/tests/resources/packerfile.json'
 exc = []
 only = ['my_first_image', 'my_second_image']
 vars = {"variable1": "value1", "variable2": "value2"}
-vars_file = 'path/to/vars/file'
+var_file = 'path/to/var/file'
 packer_exec_path = '/usr/bin/packer'
 
 p = packer.Packer(packerfile, exc=exc, only=only, vars=vars,
-                  vars_file=vars_file, exec_path=packer_exec_path)
+                  var_file=var_file, exec_path=packer_exec_path)
 p.build(parallel=True, debug=False, force=False)
 ```
 
