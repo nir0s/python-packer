@@ -3,7 +3,7 @@ import os
 import json
 import zipfile
 
-__version__ = '0.0.2'
+__version__ = '0.0.3'
 
 DEFAULT_PACKER_PATH = 'packer'
 
