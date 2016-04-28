@@ -4,7 +4,7 @@ import testtools
 import os
 
 PACKER_PATH = '/usr/bin/packer'
-TEST_RESOURCES_DIR = 'packer/tests/resources/'
+TEST_RESOURCES_DIR = 'tests/resources'
 TEST_PACKERFILE = os.path.join(TEST_RESOURCES_DIR, 'packerfile.json')
 TEST_BAD_PACKERFILE = os.path.join(TEST_RESOURCES_DIR, 'badpackerfile.json')
 
@@ -22,10 +22,6 @@ class TestBase(testtools.TestCase):
     def test_inspect(self):
         p = packer.Packer(TEST_PACKERFILE)
         p.inspect()
-
-    def test_push(self):
-        p = packer.Packer(TEST_PACKERFILE)
-        p.push()
 
     def test_validate(self):
         p = packer.Packer(TEST_PACKERFILE)
