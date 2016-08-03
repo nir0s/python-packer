@@ -13,7 +13,8 @@ class Packer(object):
     """
 
     def __init__(self, packerfile, exc=None, only=None, vars=None,
-                 var_file=None, exec_path=DEFAULT_PACKER_PATH):
+                 var_file=None, exec_path=DEFAULT_PACKER_PATH, out_iter=None,
+                 err_iter=None):
         """
         :param string packerfile: Path to Packer template file
         :param list exc: List of builders to exclude
@@ -31,7 +32,16 @@ class Packer(object):
         self.only = self._validate_argtype(only or [], list)
         self.vars = self._validate_argtype(vars or {}, dict)
 
+        kwargs = dict()
+        if out_iter is not None:
+            kwargs["_out"] = out_iter
+            kwargs["_out_bufsize"] = 1
+        if err_iter is not None:
+            kwargs["_err"] = err_iter
+            kwargs["_out_bufsize"] = 1
+
         self.packer = sh.Command(exec_path)
+        self.packer = self.packer.bake(**kwargs)
 
     def build(self, parallel=True, debug=False, force=False):
         """Executes a `packer build`
