@@ -3,13 +3,11 @@ import os
 import json
 import zipfile
 
-__version__ = '0.1.0'
-
 DEFAULT_PACKER_PATH = 'packer'
 
 
 class Packer(object):
-    """A packer client.
+    """A packer client
     """
 
     def __init__(self, packerfile, exc=None, only=None, vars=None,
