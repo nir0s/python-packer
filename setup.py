@@ -11,7 +11,7 @@ def read(*parts):
 
 setup(
     name='python-packer',
-    version='0.1.1',
+    version='0.1.2',
     url='https://github.com/nir0s/python-packer',
     author='nir0s',
     author_email='nir36g@gmail.com',
