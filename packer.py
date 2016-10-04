@@ -11,7 +11,8 @@ class Packer(object):
     """
 
     def __init__(self, packerfile, exc=None, only=None, vars=None,
-                 var_file=None, exec_path=DEFAULT_PACKER_PATH):
+                 var_file=None, exec_path=DEFAULT_PACKER_PATH, out_iter=None,
+                 err_iter=None):
         """
         :param string packerfile: Path to Packer template file
         :param list exc: List of builders to exclude
@@ -29,20 +30,33 @@ class Packer(object):
         self.only = self._validate_argtype(only or [], list)
         self.vars = self._validate_argtype(vars or {}, dict)
 
-        self.packer = sh.Command(exec_path)
+        kwargs = dict()
+        if out_iter is not None:
+            kwargs["_out"] = out_iter
+            kwargs["_out_bufsize"] = 1
+        if err_iter is not None:
+            kwargs["_err"] = err_iter
+            kwargs["_out_bufsize"] = 1
 
-    def build(self, parallel=True, debug=False, force=False):
+        self.packer = sh.Command(exec_path)
+        self.packer = self.packer.bake(**kwargs)
+
+    def build(
+            self, parallel=True, debug=False, force=False,
+            machine_readable=False):
         """Executes a `packer build`
 
         :param bool parallel: Run builders in parallel
         :param bool debug: Run in debug mode
         :param bool force: Force artifact output even if exists
+        :param bool machine_readable: Make output machine-readable
         """
         self.packer_cmd = self.packer.build
 
         self._add_opt('-parallel=true' if parallel else None)
         self._add_opt('-debug' if debug else None)
         self._add_opt('-force' if force else None)
+        self._add_opt('-machine-readable' if machine_readable else None)
         self._append_base_arguments()
         self._add_opt(self.packerfile)
 
