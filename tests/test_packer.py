@@ -1,7 +1,7 @@
+import os
+
 import packer
 
-import testtools
-import os
 
 PACKER_PATH = '/usr/bin/packer'
 TEST_RESOURCES_DIR = 'tests/resources'
@@ -9,7 +9,7 @@ TEST_PACKERFILE = os.path.join(TEST_RESOURCES_DIR, 'packerfile.json')
 TEST_BAD_PACKERFILE = os.path.join(TEST_RESOURCES_DIR, 'badpackerfile.json')
 
 
-class TestBase(testtools.TestCase):
+class TestBase():
 
     def test_build(self):
         p = packer.Packer(TEST_PACKERFILE)

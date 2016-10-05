@@ -17,7 +17,7 @@ setup(
     author_email='nir36g@gmail.com',
     license='LICENSE',
     platforms='All',
-    description='A Python interface for Hashicorp\'s Packer',
+    description="A Python interface for Hashicorp's Packer",
     long_description=read('README.rst'),
     py_modules=['packer'],
     install_requires=["sh==1.11"],

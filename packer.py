@@ -1,3 +1,17 @@
+# Copyright 2015,2016 Nir Cohen
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 import sh
 import os
 import json
@@ -7,25 +21,36 @@ DEFAULT_PACKER_PATH = 'packer'
 
 
 class Packer(object):
-    """A packer client
+    """A Hashicorp packer client
     """
 
-    def __init__(self, packerfile, exc=None, only=None, vars=None,
-                 var_file=None, exec_path=DEFAULT_PACKER_PATH, out_iter=None,
-                 err_iter=None):
-        """
+    def __init__(self,
+                 packerfile,
+                 exc=None,
+                 only=None,
+                 vars=None,
+                 var_file=None,
+                 exec_path=DEFAULT_PACKER_PATH,
+                 out_iter=None,
+                 err_iter=None,
+                 validate=False):
+        """Initialize a packer instance
+
         :param string packerfile: Path to Packer template file
         :param list exc: List of builders to exclude
         :param list only: List of builders to include
         :param dict vars: key=value pairs of template variables
         :param string var_file: Path to variables file
         :param string exec_path: Path to Packer executable
+        :param bool validate: Whether to validate the packerfile on init
         """
+        # TODO: redo type validation. This is nasty
         self.packerfile = self._validate_argtype(packerfile, str)
-        self.var_file = var_file
-        if not os.path.isfile(self.packerfile):
+        if not os.path.isfile(packerfile):
             raise OSError('packerfile not found at path: {0}'.format(
-                self.packerfile))
+                packerfile))
+        self.validate(syntax_only=True)
+        self.var_file = var_file
         self.exc = self._validate_argtype(exc or [], list)
         self.only = self._validate_argtype(only or [], list)
         self.vars = self._validate_argtype(vars or {}, dict)
@@ -41,10 +66,12 @@ class Packer(object):
         self.packer = sh.Command(exec_path)
         self.packer = self.packer.bake(**kwargs)
 
-    def build(
-            self, parallel=True, debug=False, force=False,
-            machine_readable=False):
-        """Executes a `packer build`
+    def build(self,
+              parallel=True,
+              debug=False,
+              force=False,
+              machine_readable=False):
+        """Return the result of a `packer build` execution
 
         :param bool parallel: Run builders in parallel
         :param bool debug: Run in debug mode
@@ -63,7 +90,10 @@ class Packer(object):
         return self.packer_cmd()
 
     def fix(self, to_file=None):
-        """Implements the `packer fix` function
+        """Return a fixed packerfile as provided by the `packer fix` command
+
+        v0.2.0: `result.fixed` is deprecated and will be removed sometime in
+         the future. `result` will instead return the fixed packerfile.
 
         :param string to_file: File to output fixed template to
         """
@@ -73,13 +103,19 @@ class Packer(object):
 
         result = self.packer_cmd()
         if to_file:
-            with open(to_file, 'w') as f:
-                f.write(result.stdout)
-        result.fixed = json.loads(result.stdout)
+            with open(to_file, 'w') as fixed_packerfile:
+                fixed_packerfile.write(result.stdout)
+        result = json.loads(result.stdout)
+        # Deprecated in v0.2.0
+        result.fixed = result
         return result
 
-    def inspect(self, mrf=True):
-        """Inspects a Packer Templates file (`packer inspect -machine-readable`)
+    def inspect(self, machine_readable=True, mrf=True):
+        """Return the result of a packerfile inspection
+
+        v0.2.0: `mrf` is deprecated and will be removed sometime in the
+         future. It is replaced with `machine_readable` Same goes for
+         `result.parsed_output` which will be put in `result`.
 
         To return the output in a readable form, the `-machine-readable` flag
         is appended automatically, afterwhich the output is parsed and returned
@@ -106,22 +142,29 @@ class Packer(object):
             }
           ]
 
-        :param bool mrf: output in machine-readable form.
+        DEPRECATED: param bool mrf: output in machine-readable form.
+        :param bool machine_readable: output in machine-readable form.
         """
         self.packer_cmd = self.packer.inspect
 
-        self._add_opt('-machine-readable' if mrf else None)
+        self._add_opt('-machine-readable' if mrf or machine_readable else None)
         self._add_opt(self.packerfile)
 
         result = self.packer_cmd()
-        if mrf:
+        if machine_readable or mrf:
+            if mrf:
+                print(
+                    '`mrf` is deprecated starting with v0.2.0. Please use '
+                    '`machine_readable` instead.')
+            # `parsed_output` is deprecated in 0.2.0v
             result.parsed_output = self._parse_inspection_output(result.stdout)
+            result = result.parsed_output
         else:
             result.parsed_output = None
         return result
 
     def push(self, create=True, token=False):
-        """Implmenets the `packer push` function
+        """Return the result of a `packer push` execution
 
         UNTESTED! Must be used alongside an Atlas account
         """
@@ -134,9 +177,10 @@ class Packer(object):
         return self.packer_cmd()
 
     def validate(self, syntax_only=False):
-        """Validates a Packer Template file (`packer validate`)
+        """Return the result of a packerfile validation
 
         If the validation failed, an `sh` exception will be raised.
+
         :param bool syntax_only: Whether to validate the syntax only
         without validating the configuration itself.
         """
@@ -152,6 +196,7 @@ class Packer(object):
         try:
             validation = self.packer_cmd()
             validation.succeeded = validation.exit_code == 0
+            validation.failed = not validation.succeeded
             validation.error = None
         except Exception as ex:
             validation = ValidationObject()
@@ -161,10 +206,10 @@ class Packer(object):
         return validation
 
     def version(self):
-        """Returns Packer's version number (`packer version`)
+        """Return Packer's version number
 
         As of v0.7.5, the format shows when running `packer version`
-        is: Packer vX.Y.Z. This method will only returns the number, without
+        is: Packer vX.Y.Z. This method will only return the number, without
         the `packer v` prefix so that you don't have to parse the version
         yourself.
         """
@@ -174,14 +219,16 @@ class Packer(object):
         if option:
             self.packer_cmd = self.packer_cmd.bake(option)
 
-    def _validate_argtype(self, arg, argtype):
-        if not isinstance(arg, argtype):
+    def _validate_argtype(self, argument, required_argtype):
+        """Return an argument if it passed type validation
+        """
+        if not isinstance(argument, required_argtype):
             raise PackerException('{0} argument must be of type {1}'.format(
-                arg, argtype))
-        return arg
+                argument, required_argtype))
+        return argument
 
     def _append_base_arguments(self):
-        """Appends base arguments to packer commands.
+        """Append base arguments to packer commands.
 
         -except, -only, -var and -var-file are appeneded to almost
         all subcommands in packer. As such this can be called to add
@@ -199,12 +246,13 @@ class Packer(object):
         if self.var_file:
             self._add_opt('-var-file={0}'.format(self.var_file))
 
-    def _join_comma(self, lst):
-        """Returns a comma delimited string from a list"""
-        return str(','.join(lst))
+    def _join_comma(self, a_list):
+        """Return a comma delimited string from a list
+        """
+        return str(','.join(a_list))
 
     def _parse_inspection_output(self, output):
-        """Parses the machine-readable output `packer inspect` provides.
+        """Return a dictionary containing the parts of an inspected packerfile
 
         See the inspect method for more info.
         This has been tested vs. Packer v0.7.5

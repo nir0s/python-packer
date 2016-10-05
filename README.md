@@ -59,15 +59,15 @@ The `output_file` parameter will write the output of the `fix` function to a fil
 
 ### [Packer.inspect()](https://www.packer.io/docs/command-line/inspect.html)
 
-A `-machine-readable` (mrf) argument is provided.
+A `-machine-readable` argument is provided.
 
-If the `mrf` argument is set to `True`, the output will be parsed and an object containing the parsed output will be exposed as a dictionary containing the components:
+If the `machine_readable` argument is set to `True`, the output will be parsed and an object containing the parsed output will be exposed as a dictionary containing the components:
 
 ```python
 ...
 
 p = packer.Packer(packerfile, ...)
-result = p.inspect(mrf=True)
+result = p.inspect(machine_reable=True)
 print(result.parsed_output)
 # print(result.stdout) can also be used here
 
@@ -95,7 +95,7 @@ print(result.parsed_output)
 ]
 ```
 
-If the `mrf` argument is set to `False`, the output will not be parsed but rather returned as is:
+If the `machine_readable` argument is set to `False`, the output will not be parsed but rather returned as is:
 
 ```python
 ...
