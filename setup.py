@@ -20,7 +20,7 @@ setup(
     description='A Python interface for Hashicorp\'s Packer',
     long_description=read('README.rst'),
     py_modules=['packer'],
-    install_requires=["sh==1.11"],
+    install_requires=["sh"],
     classifiers=[
         'Programming Language :: Python',
         'Natural Language :: English',
