@@ -7,14 +7,14 @@ exc = []
 only = []
 # vars = {"variable1": "y", "variable2": "value"}
 vars = {}
-vars_file = '/x'
+var_file = 'packer/var/amazon-linux.json'
 
 p = packer.Installer('packer_executables/', 'packer_0.7.5_linux_amd64.zip')
 # If we installed packer using the provided installer, it will return
 # packer's executable path. We can use it below:
 # packer_exec = p.install()
 packer_exec = 'packer'
-p = packer.Packer(packerfile, exc=exc, only=only, vars=vars,
+p = packer.Packer(packerfile, exc=exc, only=only, vars=vars, var_file=var_file,
                   exec_path=packer_exec)
 # print(p.version())
 # validation = p.validate(syntax_only=True)

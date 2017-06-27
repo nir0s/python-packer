@@ -115,7 +115,8 @@ class Packer(object):
 
         result = self.packer_cmd()
         if mrf:
-            result.parsed_output = self._parse_inspection_output(result.stdout)
+            result.parsed_output = self._parse_inspection_output(
+                result.stdout.decode('utf-8'))
         else:
             result.parsed_output = None
         return result
