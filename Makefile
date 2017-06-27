@@ -27,6 +27,9 @@ files:
 	git log --oneline --decorate --color > CHANGELOG
 
 test:
+	@install -d var
+	@echo "Looking up latest Amazon Linux AMI"
+	aws --profile=stelligent-labs ec2 describe-images --owners amazon --filters 'Name=virtualization-type,Values=hvm' 'Name=root-device-type,Values=ebs' 'Name=architecture,Values=x86_64' 'Name=is-public,Values=true' 'Name=name,Values=amzn-ami-hvm-*-gp2' --query 'Images[*].{aws_source_ami:ImageId,created:CreationDate,description:Description}' |jq 'sort_by(.created)[-1]' |tee var/amazon-linux.json
 	pip install tox==1.7.1
 	tox
 

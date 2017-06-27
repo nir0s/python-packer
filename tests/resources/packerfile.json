@@ -5,7 +5,7 @@
     "aws_access_key": "{{env `AWS_ACCESS_KEY_ID`}}",
     "aws_secret_key": "{{env `AWS_ACCESS_KEY`}}",
     "aws_source_ami": "",
-    "instance_type": "m3.large",
+    "instance_type": "t2.large",
     "virtualbox_source_image": "",
     "insecure_private_key": "./keys/insecure_private_key"
     },
