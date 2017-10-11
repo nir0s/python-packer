@@ -1,0 +1,10 @@
+{
+  "builders": [
+    {
+      "type": "null",
+      "ssh_host": "127.0.0.1",
+      "ssh_username": "root",
+      "ssh_password": "password"
+    }
+  ]
+}

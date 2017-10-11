@@ -41,9 +41,8 @@ class Packer(object):
         self.packer = sh.Command(exec_path)
         self.packer = self.packer.bake(**kwargs)
 
-    def build(
-            self, parallel=True, debug=False, force=False,
-            machine_readable=False):
+    def build(self, parallel=True, debug=False, force=False,
+              machine_readable=False):
         """Executes a `packer build`
 
         :param bool parallel: Run builders in parallel
@@ -74,8 +73,8 @@ class Packer(object):
         result = self.packer_cmd()
         if to_file:
             with open(to_file, 'w') as f:
-                f.write(result.stdout)
-        result.fixed = json.loads(result.stdout)
+                f.write(result.stdout.decode())
+        result.fixed = json.loads(result.stdout.decode())
         return result
 
     def inspect(self, mrf=True):
@@ -115,7 +114,8 @@ class Packer(object):
 
         result = self.packer_cmd()
         if mrf:
-            result.parsed_output = self._parse_inspection_output(result.stdout)
+            result.parsed_output = self._parse_inspection_output(
+                                                        result.stdout.decode())
         else:
             result.parsed_output = None
         return result
