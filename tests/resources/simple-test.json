@@ -1,10 +1,10 @@
 {
   "builders": [
     {
-      "type": "null",
-      "ssh_host": "127.0.0.1",
-      "ssh_username": "root",
-      "ssh_password": "password"
+      "type": "docker",
+      "image": "alpine",
+      "discard": true,
+      "run_command": ["-d", "-i", "-t", "{{.Image}}", "/bin/sh"]
     }
   ]
 }
