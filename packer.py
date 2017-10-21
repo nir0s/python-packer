@@ -1,7 +1,8 @@
-import sh
-import os
 import json
+import os
 import zipfile
+
+import sh
 
 DEFAULT_PACKER_PATH = 'packer'
 
@@ -10,8 +11,14 @@ class Packer(object):
     """A packer client
     """
 
-    def __init__(self, packerfile, exc=None, only=None, vars=None,
-                 var_file=None, exec_path=DEFAULT_PACKER_PATH, out_iter=None,
+    def __init__(self,
+                 packerfile,
+                 exc=None,
+                 only=None,
+                 vars=None,
+                 var_file=None,
+                 exec_path=DEFAULT_PACKER_PATH,
+                 out_iter=None,
                  err_iter=None):
         """
         :param string packerfile: Path to Packer template file
@@ -24,8 +31,8 @@ class Packer(object):
         self.packerfile = self._validate_argtype(packerfile, str)
         self.var_file = var_file
         if not os.path.isfile(self.packerfile):
-            raise OSError('packerfile not found at path: {0}'.format(
-                self.packerfile))
+            raise OSError(
+                'packerfile not found at path: {0}'.format(self.packerfile))
         self.exc = self._validate_argtype(exc or [], list)
         self.only = self._validate_argtype(only or [], list)
         self.vars = self._validate_argtype(vars or {}, dict)
@@ -41,7 +48,10 @@ class Packer(object):
         self.packer = sh.Command(exec_path)
         self.packer = self.packer.bake(**kwargs)
 
-    def build(self, parallel=True, debug=False, force=False,
+    def build(self,
+              parallel=True,
+              debug=False,
+              force=False,
               machine_readable=False):
         """Executes a `packer build`
 
@@ -115,7 +125,7 @@ class Packer(object):
         result = self.packer_cmd()
         if mrf:
             result.parsed_output = self._parse_inspection_output(
-                                                        result.stdout.decode())
+                result.stdout.decode())
         else:
             result.parsed_output = None
         return result
@@ -176,8 +186,8 @@ class Packer(object):
 
     def _validate_argtype(self, arg, argtype):
         if not isinstance(arg, argtype):
-            raise PackerException('{0} argument must be of type {1}'.format(
-                arg, argtype))
+            raise PackerException(
+                '{0} argument must be of type {1}'.format(arg, argtype))
         return arg
 
     def _append_base_arguments(self):
