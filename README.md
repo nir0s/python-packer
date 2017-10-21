@@ -15,7 +15,7 @@ The interface has been developed vs. Packer v0.7.5.
 
 ## Installation
 
-You must have Packer installed prior to using this client though as installer class is provided to install packer for you.
+You must have Packer installed prior to using this client.
 
 ```shell
  pip install python-packer
@@ -151,19 +151,6 @@ p.validate(syntax_only=False)
 
 p = packer.Packer(packerfile, ...)
 print(p.version())
-```
-
-### PackerInstaller.install()
-
-This installs packer to `packer_path` using the `installer_path` and verifies that the installation was successful.
-
-```python
-
-packer_path = '/usr/bin/'
-installer_path = 'Downloads/packer_0.7.5_linux_amd64.zip'
-
-p = packer.Installer(packer_path, installer_path)
-p.install()
 ```
 
 ## Shell Interaction
