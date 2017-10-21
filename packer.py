@@ -227,28 +227,6 @@ class Packer(object):
         return parts
 
 
-class Installer(object):
-    def __init__(self, packer_path, installer_path):
-        self.packer_path = packer_path
-        self.installer_path = installer_path
-
-    def install(self):
-        with open(self.installer_path, 'rb') as f:
-            zip = zipfile.ZipFile(f)
-            for path in zip.namelist():
-                zip.extract(path, self.packer_path)
-        exec_path = os.path.join(self.packer_path, 'packer')
-        if not self._verify_packer_installed(exec_path):
-            raise PackerException('packer installation failed. '
-                                  'Executable could not be found under: '
-                                  '{0}'.format(exec_path))
-        else:
-            return exec_path
-
-    def _verify_packer_installed(self, packer_path):
-        return os.path.isfile(packer_path)
-
-
 class ValidationObject():
     pass
 
