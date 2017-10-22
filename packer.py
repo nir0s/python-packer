@@ -1,8 +1,9 @@
+import copy
 import json
 import os
+import subprocess
 import zipfile
 
-import sh
 
 DEFAULT_PACKER_PATH = 'packer'
 
@@ -69,7 +70,9 @@ class Packer(object):
         :param bool force: Force artifact output even if exists
         :param bool machine_readable: Make output machine-readable
         """
-        self.packer_cmd = self.packer.build
+        cmd = copy.copy(self.packer)
+        cmd.append('build')
+        self.packer_cmd = cmd
 
         self._add_opt('-parallel=true' if parallel else None)
         self._add_opt('-debug' if debug else None)
@@ -78,18 +81,20 @@ class Packer(object):
         self._append_base_arguments()
         self._add_opt(self.packerfile)
 
-        return self.packer_cmd()
+        return subprocess.run(self.packer_cmd)
 
     def fix(self, to_file=None):
         """Implements the `packer fix` function
 
         :param string to_file: File to output fixed template to
         """
-        self.packer_cmd = self.packer.fix
+        cmd = copy.copy(self.packer)
+        cmd.append('fix')
+        self.packer_cmd = cmd
 
         self._add_opt(self.packerfile)
 
-        result = self.packer_cmd()
+        result = subprocess.run(cmd, stdout=subprocess.PIPE)
         if to_file:
             with open(to_file, 'w') as f:
                 f.write(result.stdout.decode())
@@ -126,17 +131,19 @@ class Packer(object):
 
         :param bool mrf: output in machine-readable form.
         """
-        self.packer_cmd = self.packer.inspect
+        cmd = copy.copy(self.packer)
+        cmd.append('inspect')
+        self.packer_cmd = cmd
 
         self._add_opt('-machine-readable' if mrf else None)
         self._add_opt(self.packerfile)
 
-        result = self.packer_cmd()
-        if mrf:
-            result.parsed_output = self._parse_inspection_output(
-                result.stdout.decode())
-        else:
-            result.parsed_output = None
+        result = subprocess.run(self.packer_cmd)
+        # if mrf:
+        #     result.parsed_output = self._parse_inspection_output(
+        #         result.stdout.decode())
+        # else:
+        #     result.parsed_output = None
         return result
 
     def push(self, create=True, token=False):
@@ -144,13 +151,15 @@ class Packer(object):
 
         UNTESTED! Must be used alongside an Atlas account
         """
-        self.packer_cmd = self.packer.push
+        cmd = copy.copy(self.packer)
+        cmd.append('push')
+        self.packer_cmd = cmd
 
         self._add_opt('-create=true' if create else None)
         self._add_opt('-tokn={0}'.format(token) if token else None)
         self._add_opt(self.packerfile)
 
-        return self.packer_cmd()
+        return subprocess.run(cmd)
 
     def validate(self, syntax_only=False):
         """Validates a Packer Template file (`packer validate`)
@@ -159,7 +168,9 @@ class Packer(object):
         :param bool syntax_only: Whether to validate the syntax only
         without validating the configuration itself.
         """
-        self.packer_cmd = self.packer.validate
+        cmd = copy.copy(self.packer)
+        cmd.append('validate')
+        self.packer_cmd = cmd
 
         self._add_opt('-syntax-only' if syntax_only else None)
         self._append_base_arguments()
@@ -168,16 +179,16 @@ class Packer(object):
         # as sh raises an exception rather than return a value when execution
         # fails we create an object to return the exception and the validation
         # state
-        try:
-            validation = self.packer_cmd()
-            validation.succeeded = validation.exit_code == 0
-            validation.error = None
-        except Exception as ex:
-            validation = ValidationObject()
-            validation.succeeded = False
-            validation.failed = True
-            validation.error = ex.message
-        return validation
+        # try:
+        #     validation = subprocess.run(self.packer_cmd)
+        #     validation.succeeded = validation.exit_code == 0
+        #     validation.error = None
+        # except Exception as ex:
+        #     validation = ValidationObject()
+        #     validation.succeeded = False
+        #     validation.failed = True
+        #     validation.error = ex.message
+        return subprocess.run(self.packer_cmd)
 
     def version(self):
         """Returns Packer's version number (`packer version`)
@@ -191,7 +202,7 @@ class Packer(object):
 
     def _add_opt(self, option):
         if option:
-            self.packer_cmd = self.packer_cmd.bake(option)
+            self.packer_cmd.append(option)
 
     def _validate_argtype(self, arg, argtype):
         if not isinstance(arg, argtype):
