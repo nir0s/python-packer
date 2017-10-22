@@ -45,8 +45,17 @@ class Packer(object):
             kwargs["_err"] = err_iter
             kwargs["_out_bufsize"] = 1
 
-        self.packer = sh.Command(exec_path)
-        self.packer = self.packer.bake(**kwargs)
+        command = []
+        command.append(exec_path)
+        command.extend(self.dict_to_command(kwargs))
+        self.packer = command
+
+    def dict_to_command(self, kwargs):
+        """Convert dict to '--key=value' command parameters"""
+        param = []
+        for parameter, value in kwargs.items():
+            param.append('--{}={}'.format(parameter, value))
+        return param
 
     def build(self,
               parallel=True,
