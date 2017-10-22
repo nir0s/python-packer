@@ -198,7 +198,11 @@ class Packer(object):
         the `packer v` prefix so that you don't have to parse the version
         yourself.
         """
-        return self.packer.version().split('v')[1].rstrip('\n')
+        cmd = copy.copy(self.packer)
+        cmd.append('version')
+        output = subprocess.run(cmd, stdout=subprocess.PIPE)
+        version = output.stdout.decode().split('\n')[0].split('v')[1]
+        return version
 
     def _add_opt(self, option):
         if option:
