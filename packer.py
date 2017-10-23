@@ -4,6 +4,7 @@ import os
 import subprocess
 import zipfile
 
+from collections import namedtuple
 
 DEFAULT_PACKER_PATH = 'packer'
 
@@ -259,6 +260,15 @@ class Packer(object):
                     provisioner = {"type": line[1]}
                     parts['provisioners'].append(provisioner)
         return parts
+
+    def _run_command(self, command):
+        """Wrapper to execute command"""
+        PackerCommand = namedtuple('PackerCommand', ['stdout', 'stderr'])
+        executed = subprocess.run(
+            command, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+        packer_command = PackerCommand(executed.stdout.decode(),
+                                       executed.stderr.decode())
+        return packer_command
 
 
 class ValidationObject():
