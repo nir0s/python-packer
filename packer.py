@@ -201,8 +201,8 @@ class Packer(object):
         """
         cmd = copy.copy(self.packer)
         cmd.append('version')
-        output = subprocess.run(cmd, stdout=subprocess.PIPE)
-        version = output.stdout.decode().split('\n')[0].split('v')[1]
+        output = self._run_command(cmd)
+        version = output.stdout.split('\n')[0].split('v')[1]
         return version
 
     def _add_opt(self, option):
