@@ -81,7 +81,7 @@ class Packer(object):
         self._append_base_arguments()
         self._add_opt(self.packerfile)
 
-        return subprocess.run(self.packer_cmd)
+        return self._run_command(self.packer_cmd)
 
     def fix(self, to_file=None):
         """Implements the `packer fix` function
