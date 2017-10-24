@@ -155,11 +155,12 @@ class Packer(object):
         cmd.append('push')
         self.packer_cmd = cmd
 
-        self._add_opt('-create=true' if create else None)
-        self._add_opt('-tokn={0}'.format(token) if token else None)
+        # self._add_opt('-create=true' if create else None)
+        self._add_opt('-token={0}'.format(token) if token else None)
         self._add_opt(self.packerfile)
 
-        return subprocess.run(cmd)
+        result = self._run_command(self.packer_cmd)
+        return result
 
     def validate(self, syntax_only=False):
         """Validates a Packer Template file (`packer validate`)
