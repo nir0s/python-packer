@@ -94,11 +94,11 @@ class Packer(object):
 
         self._add_opt(self.packerfile)
 
-        result = subprocess.run(cmd, stdout=subprocess.PIPE)
+        result = self._run_command(self.packer_cmd)
         if to_file:
             with open(to_file, 'w') as f:
-                f.write(result.stdout.decode())
-        result.fixed = json.loads(result.stdout.decode())
+                f.write(result.stdout)
+        result = json.loads(result.stdout)
         return result
 
     def inspect(self, mrf=True):
