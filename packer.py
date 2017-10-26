@@ -217,9 +217,11 @@ class Packer(object):
             self._add_opt('-except={0}'.format(self._join_comma(self.exc)))
         elif self.only:
             self._add_opt('-only={0}'.format(self._join_comma(self.only)))
+
         for var, value in self.vars.items():
             self._add_opt("-var")
             self._add_opt("{0}={1}".format(var, value))
+
         if self.var_file:
             self._add_opt('-var-file={0}'.format(self.var_file))
 
@@ -236,17 +238,21 @@ class Packer(object):
         parts = {'variables': [], 'builders': [], 'provisioners': []}
         for line in output.splitlines():
             line = line.split(',')
-            if line[2].startswith('template'):
-                del line[0:2]
+
+            packer_type = line[2]
+            if packer_type.startswith('template'):
+                del line[0:2]  # Remove date
                 component = line[0]
+                name = line[1]
+
                 if component == 'template-variable':
-                    variable = {"name": line[1], "value": line[2]}
+                    variable = {"name": name, "value": line[2]}
                     parts['variables'].append(variable)
                 elif component == 'template-builder':
-                    builder = {"name": line[1], "type": line[2]}
+                    builder = {"name": name, "type": line[2]}
                     parts['builders'].append(builder)
                 elif component == 'template-provisioner':
-                    provisioner = {"type": line[1]}
+                    provisioner = {"type": name}
                     parts['provisioners'].append(provisioner)
         return parts
 
