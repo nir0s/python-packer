@@ -138,12 +138,10 @@ class Packer(object):
         self._add_opt('-machine-readable' if mrf else None)
         self._add_opt(self.packerfile)
 
-        result = subprocess.run(self.packer_cmd)
-        # if mrf:
-        #     result.parsed_output = self._parse_inspection_output(
-        #         result.stdout.decode())
-        # else:
-        #     result.parsed_output = None
+        output = self._run_command(self.packer_cmd)
+        result = output.stdout
+        if mrf:
+            result = self._parse_inspection_output(output.stdout)
         return result
 
     def push(self, create=True, token=False):
