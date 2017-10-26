@@ -177,19 +177,10 @@ class Packer(object):
         self._append_base_arguments()
         self._add_opt(self.packerfile)
 
-        # as sh raises an exception rather than return a value when execution
-        # fails we create an object to return the exception and the validation
-        # state
-        # try:
-        #     validation = subprocess.run(self.packer_cmd)
-        #     validation.succeeded = validation.exit_code == 0
-        #     validation.error = None
-        # except Exception as ex:
-        #     validation = ValidationObject()
-        #     validation.succeeded = False
-        #     validation.failed = True
-        #     validation.error = ex.message
-        return subprocess.run(self.packer_cmd)
+        result = self._run_command(self.packer_cmd)
+        if result.returncode:
+            raise PackerException(result.stdout)
+        return result
 
     def version(self):
         """Returns Packer's version number (`packer version`)
@@ -271,10 +262,6 @@ class Packer(object):
                                      executed.stderr.decode(),
                                      executed.returncode)
         return packer_output
-
-
-class ValidationObject():
-    pass
 
 
 class PackerException(Exception):
