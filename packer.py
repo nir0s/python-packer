@@ -263,11 +263,13 @@ class Packer(object):
 
     def _run_command(self, command):
         """Wrapper to execute command"""
-        PackerOutput = namedtuple('PackerOutput', ['stdout', 'stderr'])
+        PackerOutput = namedtuple('PackerOutput',
+                                  ['stdout', 'stderr', 'returncode'])
         executed = subprocess.run(
             command, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
         packer_output = PackerOutput(executed.stdout.decode(),
-                                     executed.stderr.decode())
+                                     executed.stderr.decode(),
+                                     executed.returncode)
         return packer_output
 
 
