@@ -3,7 +3,6 @@ import packer
 import testtools
 import os
 
-PACKER_PATH = '/usr/bin/packer'
 TEST_RESOURCES_DIR = 'tests/resources'
 TEST_PACKERFILE = os.path.join(TEST_RESOURCES_DIR, 'simple-test.json')
 TEST_BAD_PACKERFILE = os.path.join(TEST_RESOURCES_DIR, 'badpackerfile.json')
