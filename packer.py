@@ -6,10 +6,9 @@ import zipfile
 DEFAULT_PACKER_PATH = 'packer'
 
 
-class Packer(object):
+class Packer():
     """A packer client
     """
-
     def __init__(self, packerfile, exc=None, only=None, vars=None,
                  var_file=None, exec_path=DEFAULT_PACKER_PATH, out_iter=None,
                  err_iter=None):
@@ -42,9 +41,8 @@ class Packer(object):
         self.packer = self.packer.bake(**kwargs)
 
     def build(self, parallel=True, debug=False, force=False,
-              machine_readable=False):
+              machine_readable=True):
         """Executes a `packer build`
-
         :param bool parallel: Run builders in parallel
         :param bool debug: Run in debug mode
         :param bool force: Force artifact output even if exists
@@ -58,12 +56,21 @@ class Packer(object):
         self._add_opt('-machine-readable' if machine_readable else None)
         self._append_base_arguments()
         self._add_opt(self.packerfile)
-
-        return self.packer_cmd()
+        try:
+            validation = self.packer_cmd()
+            validation.status = validation.exit_code == 0
+            validation.error = None
+        except sh.ErrorReturnCode as e:
+            validation = ValidationObject()
+            validation.status = False
+            validation.error = e.stderr
+            validation.stdout = e.stdout
+        finally:
+            validation.output = ( validation.error.decode() if validation.error is not None else '' )+ validation.stdout.decode()
+        return validation
 
     def fix(self, to_file=None):
         """Implements the `packer fix` function
-
         :param string to_file: File to output fixed template to
         """
         self.packer_cmd = self.packer.fix
@@ -79,7 +86,6 @@ class Packer(object):
 
     def inspect(self, mrf=True):
         """Inspects a Packer Templates file (`packer inspect -machine-readable`)
-
         To return the output in a readable form, the `-machine-readable` flag
         is appended automatically, afterwhich the output is parsed and returned
         as a dict of the following format:
@@ -104,7 +110,6 @@ class Packer(object):
               "name": "amazon"
             }
           ]
-
         :param bool mrf: output in machine-readable form.
         """
         self.packer_cmd = self.packer.inspect
@@ -122,7 +127,6 @@ class Packer(object):
 
     def push(self, create=True, token=False):
         """Implmenets the `packer push` function
-
         UNTESTED! Must be used alongside an Atlas account
         """
         self.packer_cmd = self.packer.push
@@ -135,7 +139,6 @@ class Packer(object):
 
     def validate(self, syntax_only=False):
         """Validates a Packer Template file (`packer validate`)
-
         If the validation failed, an `sh` exception will be raised.
         :param bool syntax_only: Whether to validate the syntax only
         without validating the configuration itself.
@@ -162,7 +165,6 @@ class Packer(object):
 
     def version(self):
         """Returns Packer's version number (`packer version`)
-
         As of v0.7.5, the format shows when running `packer version`
         is: Packer vX.Y.Z. This method will only returns the number, without
         the `packer v` prefix so that you don't have to parse the version
@@ -182,7 +184,6 @@ class Packer(object):
 
     def _append_base_arguments(self):
         """Appends base arguments to packer commands.
-
         -except, -only, -var and -var-file are appeneded to almost
         all subcommands in packer. As such this can be called to add
         these flags to the subcommand.
@@ -205,7 +206,6 @@ class Packer(object):
 
     def _parse_inspection_output(self, output):
         """Parses the machine-readable output `packer inspect` provides.
-
         See the inspect method for more info.
         This has been tested vs. Packer v0.7.5
         """
@@ -227,7 +227,7 @@ class Packer(object):
         return parts
 
 
-class Installer(object):
+class Installer():
     def __init__(self, packer_path, installer_path):
         self.packer_path = packer_path
         self.installer_path = installer_path
@@ -251,7 +251,6 @@ class Installer(object):
 
 class ValidationObject():
     pass
-
 
 class PackerException(Exception):
     pass
