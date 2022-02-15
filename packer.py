@@ -10,7 +10,7 @@ class Packer():
     """A packer client
     """
     def __init__(self, packerfile, exc=None, only=None, vars=None,
-                 var_file=None, exec_path=None, out_iter=None,
+                 var_file=None, exec_path=DEFAULT_PACKER_PATH, out_iter=None,
                  err_iter=None):
         """
         :param string packerfile: Path to Packer template file
